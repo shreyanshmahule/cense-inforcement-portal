@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CENSE Portal - Partner Requests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-color: #f97316; /* Vibrant Orange */
+            --primary-hover: #fb923c;
+            --bg-dark-primary: #111111;  /* Near Black */
+            --bg-dark-secondary: #1e1e1e; /* Panel/Card background */
+            --border-dark: #333333;
+            --text-light-primary: #f5f5f5; /* Off-white */
+            --text-light-secondary: #a3a3a3; /* Medium Grey */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark-primary);
+            color: var(--text-light-secondary);
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--text-light-primary);
+        }
+
+        .sidebar {
+            background-color: var(--bg-dark-secondary);
+            border-right: 1px solid var(--border-dark);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: #30363d;
+            color: var(--text-light-primary);
+        }
+
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 0 15px rgba(129, 140, 248, 0.4);
+        }
+
+        .top-header {
+            background-color: var(--bg-dark-secondary);
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .panel {
+            background-color: var(--bg-dark-secondary);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-dark);
+            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+        }
+
+        main {
+            background-image: linear-gradient(rgba(48, 54, 61, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(48, 54, 61, 0.5) 1px, transparent 1px);
+            background-size: 2rem 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        tbody tr {
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background-color: #30363d;
+        }
+
+        th,
+        td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-light-secondary);
+            background-color: #30363d;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .status-sent {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+        }
+
+        .status-viewed {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+        }
+
+        .status-uploaded {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+        }
+
+        .details-panel {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="flex h-screen">
+        <div class="sidebar w-64 flex-shrink-0">
+            <div class="sidebar-header p-4 flex items-center gap-3">
+                <i data-lucide="shield-check" class="text-indigo-400"></i>
+                <h1>CENSE</h1>
+            </div>
+            <nav class="sidebar-nav p-4 space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 p-2 rounded-lg">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="all-complaints.html" class="flex items-center gap-3 p-2 rounded-lg">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    <span>All Complaints</span>
+                </a>
+                <a href="partner-requests.html" class="flex items-center gap-3 p-2 rounded-lg active">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span>Partner Requests</span>
+                </a>
+                <a href="ai-crime-radar.html" class="flex items-center gap-3 p-2 rounded-lg">
+                    <i data-lucide="radar" class="w-5 h-5"></i>
+                    <span>AI Crime Radar</span>
+                </a>
+                <a href="watchlist.html" class="flex items-center gap-3 p-2 rounded-lg">
+                    <i data-lucide="list-checks" class="w-5 h-5"></i>
+                    <span>Watchlist</span>
+                </a>
+            </nav>
+        </div>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="top-header p-4">
+                <h2 class="text-xl">Partner Data Requests</h2>
+            </header>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 flex gap-6">
+                <div id="requests-list" class="flex-1 space-y-6">
+                    <div class="panel p-4 flex gap-4 items-end">
+                        <div class="flex-1">
+                            <label for="partner-filter" class="block text-sm font-medium text-gray-400">Filter by
+                                Partner</label>
+                            <select id="partner-filter"
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-800 text-white">
+                                <option value="all">All Partners</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label for="country-filter" class="block text-sm font-medium text-gray-400">Filter by
+                                Country</label>
+                            <select id="country-filter"
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-800 text-white">
+                                <option value="all">All Countries</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label for="status-filter" class="block text-sm font-medium text-gray-400">Filter by
+                                Status</label>
+                            <select id="status-filter"
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-800 text-white">
+                                <option value="all">All Statuses</option>
+                            </select>
+                        </div>
+                        <button id="clear-filters"
+                            class="p-2 border border-gray-600 rounded-md text-gray-400 hover:text-white hover:border-white transition-colors">
+                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <div class="panel p-0">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Request ID</th>
+                                        <th>Linked Case</th>
+                                        <th>Partner</th>
+                                        <th>Country</th>
+                                        <th>Date Sent</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="request-table-body">
+                                    <tr data-request-id="REQ-45A12" data-case-id="NCSC-2025-88429" data-partner="Jio"
+                                        data-country="India" data-date-sent="19-Aug-2025" data-status="uploaded">
+                                        <td class="font-semibold">REQ-45A12</td>
+                                        <td>NCSC-2025-88429</td>
+                                        <td>Jio</td>
+                                        <td>India</td>
+                                        <td>19-Aug-2025</td>
+                                        <td><span class="status-pill status-uploaded">Data Uploaded</span></td>
+                                    </tr>
+                                    <tr data-request-id="REQ-45A11" data-case-id="NCSC-2025-88427"
+                                        data-partner="Google LLC" data-country="USA" data-date-sent="18-Aug-2025"
+                                        data-status="viewed">
+                                        <td class="font-semibold">REQ-45A11</td>
+                                        <td>NCSC-2025-88427</td>
+                                        <td>Google LLC</td>
+                                        <td>USA</td>
+                                        <td>18-Aug-2025</td>
+                                        <td><span class="status-pill status-viewed">Viewed by Partner</span></td>
+                                    </tr>
+                                    <tr data-request-id="REQ-45A10" data-case-id="NCSC-2025-88425"
+                                        data-partner="HDFC Bank" data-country="India" data-date-sent="17-Aug-2025"
+                                        data-status="sent">
+                                        <td class="font-semibold">REQ-45A10</td>
+                                        <td>NCSC-2025-88425</td>
+                                        <td>HDFC Bank</td>
+                                        <td>India</td>
+                                        <td>17-Aug-2025</td>
+                                        <td><span class="status-pill status-sent">Sent</span></td>
+                                    </tr>
+                                    <tr data-request-id="REQ-45A09" data-case-id="NCSC-2025-88422"
+                                        data-partner="Microsoft" data-country="USA" data-date-sent="16-Aug-2025"
+                                        data-status="uploaded">
+                                        <td class="font-semibold">REQ-45A09</td>
+                                        <td>NCSC-2025-88422</td>
+                                        <td>Microsoft</td>
+                                        <td>USA</td>
+                                        <td>16-Aug-2025</td>
+                                        <td><span class="status-pill status-uploaded">Data Uploaded</span></td>
+                                    </tr>
+                                    <tr data-request-id="REQ-45A08" data-case-id="NCSC-2025-88419" data-partner="Amazon"
+                                        data-country="USA" data-date-sent="15-Aug-2025" data-status="viewed">
+                                        <td class="font-semibold">REQ-45A08</td>
+                                        <td>NCSC-2025-88419</td>
+                                        <td>Amazon</td>
+                                        <td>USA</td>
+                                        <td>15-Aug-2025</td>
+                                        <td><span class="status-pill status-viewed">Viewed by Partner</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="request-details" class="details-panel w-96 flex-shrink-0 panel p-6 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl" id="details-header"></h3>
+                        <button id="close-details" class="text-gray-400 hover:text-white transition-colors">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Request ID</p>
+                        <p class="font-semibold text-white" id="details-request-id"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Linked Case</p>
+                        <p class="font-semibold text-white" id="details-case-id"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Partner</p>
+                        <p class="font-semibold text-white" id="details-partner"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Country</p>
+                        <p class="font-semibold text-white" id="details-country"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Date Sent</p>
+                        <p class="font-semibold text-white" id="details-date-sent"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Status</p>
+                        <p class="font-semibold" id="details-status"></p>
+                    </div>
+                    <div class="pt-4 border-t border-gray-700">
+                        <h4 class="text-base text-white font-semibold">Requested Data</h4>
+                        <ul class="list-disc list-inside mt-2 text-sm text-gray-400 space-y-1">
+                            <li>User contact information</li>
+                            <li>IP address logs</li>
+                            <li>Transaction history</li>
+                        </ul>
+                    </div>
+                    <div class="pt-4 space-y-3">
+                        <button
+                            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors"
+                            id="download-data-btn">
+                            <i data-lucide="download" class="inline-block w-4 h-4 mr-2"></i>
+                            Download Data
+                        </button>
+                        <button
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                            Cancel Request
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const tableBody = document.getElementById('request-table-body');
+        const detailsPanel = document.getElementById('request-details');
+        const closeButton = document.getElementById('close-details');
+        const downloadButton = document.getElementById('download-data-btn');
+        const partnerFilter = document.getElementById('partner-filter');
+        const countryFilter = document.getElementById('country-filter');
+        const statusFilter = document.getElementById('status-filter');
+        const clearButton = document.getElementById('clear-filters');
+
+        // Sample data to populate filters (in a real app, this would come from a backend)
+        const allRequests = [
+            { id: "REQ-45A12", partner: "Jio", country: "India", status: "uploaded" },
+            { id: "REQ-45A11", partner: "Google LLC", country: "USA", status: "viewed" },
+            { id: "REQ-45A10", partner: "HDFC Bank", country: "India", status: "sent" },
+            { id: "REQ-45A09", partner: "Microsoft", country: "USA", status: "uploaded" },
+            { id: "REQ-45A08", partner: "Amazon", country: "USA", status: "viewed" }
+        ];
+
+        // Function to populate filter dropdowns
+        function populateFilters() {
+            const partners = new Set();
+            const countries = new Set();
+            const statuses = new Set();
+
+            allRequests.forEach(request => {
+                partners.add(request.partner);
+                countries.add(request.country);
+                statuses.add(request.status);
+            });
+
+            partners.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p;
+                option.textContent = p;
+                partnerFilter.appendChild(option);
+            });
+
+            countries.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c;
+                option.textContent = c;
+                countryFilter.appendChild(option);
+            });
+
+            statuses.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s;
+                option.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+                statusFilter.appendChild(option);
+            });
+        }
+
+        // Function to filter the table based on dropdown selections
+        function filterTable() {
+            const selectedPartner = partnerFilter.value;
+            const selectedCountry = countryFilter.value;
+            const selectedStatus = statusFilter.value;
+
+            const rows = tableBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const partner = row.getAttribute('data-partner');
+                const country = row.getAttribute('data-country');
+                const status = row.getAttribute('data-status');
+
+                const partnerMatch = (selectedPartner === 'all' || partner === selectedPartner);
+                const countryMatch = (selectedCountry === 'all' || country === selectedCountry);
+                const statusMatch = (selectedStatus === 'all' || status === selectedStatus);
+
+                if (partnerMatch && countryMatch && statusMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            // Hide details panel when filters change
+            detailsPanel.style.display = 'none';
+        }
+
+        // Event listeners for filters and clear button
+        partnerFilter.addEventListener('change', filterTable);
+        countryFilter.addEventListener('change', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+        clearButton.addEventListener('click', () => {
+            partnerFilter.value = 'all';
+            countryFilter.value = 'all';
+            statusFilter.value = 'all';
+            filterTable();
+        });
+
+        // Event listener for table rows to show details panel
+        tableBody.addEventListener('click', (event) => {
+            const row = event.target.closest('tr');
+            if (row) {
+                const requestId = row.getAttribute('data-request-id');
+                const caseId = row.getAttribute('data-case-id');
+                const partner = row.getAttribute('data-partner');
+                const country = row.getAttribute('data-country');
+                const dateSent = row.getAttribute('data-date-sent');
+                const status = row.getAttribute('data-status');
+
+                document.getElementById('details-header').textContent = `${partner} Request`;
+                document.getElementById('details-request-id').textContent = requestId;
+                document.getElementById('details-case-id').textContent = caseId;
+                document.getElementById('details-partner').textContent = partner;
+                document.getElementById('details-country').textContent = country;
+                document.getElementById('details-date-sent').textContent = dateSent;
+
+                const statusElement = document.getElementById('details-status');
+                statusElement.className = 'font-semibold status-pill';
+                if (status === 'uploaded') {
+                    statusElement.textContent = 'Data Uploaded';
+                    statusElement.classList.add('status-uploaded');
+                } else if (status === 'viewed') {
+                    statusElement.textContent = 'Viewed by Partner';
+                    statusElement.classList.add('status-viewed');
+                } else {
+                    statusElement.textContent = 'Sent';
+                    statusElement.classList.add('status-sent');
+                }
+
+                detailsPanel.style.display = 'block';
+
+                if (status === 'uploaded') {
+                    downloadButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    downloadButton.disabled = false;
+                } else {
+                    downloadButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    downloadButton.disabled = true;
+                }
+            }
+        });
+
+        closeButton.addEventListener('click', () => {
+            detailsPanel.style.display = 'none';
+        });
+
+        // Initialize filters on page load
+        populateFilters();
+    </script>
+</body>
+
+</html>

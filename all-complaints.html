@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CENSE Portal - All Complaints</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-color: #f97316; /* Vibrant Orange */
+            --primary-hover: #fb923c;
+            --bg-dark-primary: #111111;  /* Near Black */
+            --bg-dark-secondary: #1e1e1e; /* Panel/Card background */
+            --border-dark: #333333;
+            --text-light-primary: #f5f5f5; /* Off-white */
+            --text-light-secondary: #a3a3a3; /* Medium Grey */
+        }
+        
+        /* Light Theme Variables */
+        body.light-theme {
+            --primary-color: #f97316;
+            --primary-hover: #fb923c;
+            --bg-dark-primary: #f3f4f6;  /* Light Grey */
+            --bg-dark-secondary: #ffffff; /* White */
+            --border-dark: #e5e7eb;
+            --text-light-primary: #111827; /* Dark Text */
+            --text-light-secondary: #6b7280; /* Medium Grey Text */
+        }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark-primary); color: var(--text-light-secondary); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        h1, h2, h3 { font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--text-light-primary); }
+        .sidebar { background-color: var(--bg-dark-secondary); border-right: 1px solid var(--border-dark); }
+        .sidebar-header h1 { font-size: 1.5rem; font-weight: 900; }
+        .sidebar-nav a { transition: all 0.2s; }
+        .sidebar-nav a:hover { background-color: #333333; color: var(--text-light-primary); }
+        body.light-theme .sidebar-nav a:hover { background-color: #e5e7eb; }
+        .sidebar-nav a.active { background-color: var(--primary-color); color: #ffffff; font-weight: 600; box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
+        .top-header { background-color: var(--bg-dark-secondary); border-bottom: 1px solid var(--border-dark); }
+        .panel { background-color: var(--bg-dark-secondary); border-radius: 0.5rem; position: relative; border: 1px solid var(--border-dark); clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px)); }
+        main { background-image: linear-gradient(rgba(48, 54, 61, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(48, 54, 61, 0.5) 1px, transparent 1px); background-size: 2rem 2rem; }
+        body.light-theme main { background-image: linear-gradient(rgba(229, 231, 235, 0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(229, 231, 235, 0.7) 1px, transparent 1px); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        tbody tr { cursor: pointer; }
+        tbody tr:hover { background-color: #30363d; }
+        body.light-theme tbody tr:hover { background-color: #f9fafb; }
+        th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border-dark); }
+        th { font-weight: 600; color: var(--text-light-secondary); background-color: #30363d; font-family: 'Inter', sans-serif; }
+        body.light-theme th { background-color: #f9fafb; }
+        .status-pill { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 500; font-size: 0.75rem; }
+        .status-new { background-color: rgba(239, 68, 68, 0.1); color: #f87171; }
+        .status-review { background-color: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+        .status-pending { background-color: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: var(--primary-color); color: white; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 15px rgba(249, 115, 22, 0.3); }
+        .btn:hover { background-color: var(--primary-hover); box-shadow: 0 0 20px rgba(251, 146, 60, 0.5); }
+        
+        /* Filter Bar */
+        .filter-bar { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1rem; }
+        .filter-group { display: flex; flex-direction: column; }
+        .filter-group label { font-size: 0.75rem; font-weight: 500; color: var(--text-light-secondary); margin-bottom: 0.25rem; }
+        .filter-group input, .filter-group select { background-color: var(--bg-dark-primary); border: 1px solid var(--border-dark); border-radius: 0.5rem; color: var(--text-light-primary); padding: 0.5rem 1rem; }
+        
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(17, 24, 39, 0.8); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .modal-box { background-color: var(--bg-dark-secondary); border-radius: 0.75rem; border: 1px solid var(--border-dark); width: 100%; max-width: 56rem; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-dark); }
+        .modal-header h2 { font-size: 1.25rem; }
+        .modal-close-btn { background: none; border: none; cursor: pointer; color: var(--text-light-secondary); }
+        .modal-content { padding: 1.5rem; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .detail-item strong { display: block; color: var(--text-light-secondary); font-weight: 500; font-size: 0.8rem; }
+        .detail-item span { color: var(--text-light-primary); font-weight: 600; }
+        .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        
+        .chat-log { max-height: 300px; overflow-y: auto; padding: 1rem; background-color: var(--bg-dark-primary); border-radius: 0.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        .chat-message { display: flex; gap: 0.75rem; max-width: 90%; }
+        .chat-message .avatar { width: 32px; height: 32px; border-radius: 50%; background-color: var(--border-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .message-content { background-color: #30363d; padding: 0.75rem 1rem; border-radius: 0.75rem; }
+        .message-author { font-weight: 600; font-size: 0.875rem; color: var(--text-light-primary); }
+        .message-text { font-size: 0.9rem; color: var(--text-light-secondary); margin-top: 0.25rem; white-space: pre-wrap; }
+        .message-time { font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; }
+        .officer-message { align-self: flex-start; }
+        .user-message { align-self: flex-end; flex-direction: row-reverse; }
+        .user-message .message-content { background-color: #7c2d12; }
+        .user-message .message-author { color: var(--primary-hover); }
+        .chat-form { margin-top: 1rem; }
+        .chat-form textarea { width: 100%; border: 1px solid var(--border-dark); border-radius: 0.5rem; padding: 0.75rem 1rem; background-color: var(--bg-dark-primary); color: var(--text-light-primary); resize: vertical; }
+        
+        .action-panel { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-dark); }
+        .action-panel h3 { margin-bottom: 1rem; }
+        .action-panel .btn { width: 100%; margin-bottom: 0.5rem; }
+
+        .file-list-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 0.25rem; transition: background-color 0.2s; }
+        .file-list-item:hover { background-color: #30363d; }
+        .file-list-item .lucide { color: var(--primary-color); }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen">
+        <div class="sidebar w-64 flex-shrink-0"><div class="sidebar-header p-4 flex items-center gap-3"><i data-lucide="shield-check" class="text-orange-400"></i><h1>CENSE</h1></div><nav class="sidebar-nav p-4 space-y-2"><a href="dashboard.html" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span></a><a href="all-complaints.html" class="flex items-center gap-3 p-2 rounded-lg active"><i data-lucide="file-text" class="w-5 h-5"></i><span>All Complaints</span></a><a href="partner-requests.html" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i><span>Partner Requests</span></a><a href="ai-crime-radar.html" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="radar" class="w-5 h-5"></i><span>AI Crime Radar</span></a><a href="watchlist.html" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="list-checks" class="w-5 h-5"></i><span>Watchlist</span></a></nav></div>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="top-header p-4 flex justify-between items-center">
+                <h2 class="text-xl">All Complaints</h2>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-400">Welcome, Inspector Sharma</span>
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-700 text-gray-400">
+                        <i data-lucide="sun" id="theme-toggle-sun" class="hidden w-5 h-5"></i>
+                        <i data-lucide="moon" id="theme-toggle-moon" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
+                <div class="panel p-0">
+                    <div class="filter-bar border-b border-gray-700">
+                        <div class="filter-group"><label>Search by ID</label><input type="text" id="filter-id" placeholder="NCSC-2025-..."></div>
+                        <div class="filter-group"><label>Crime Type</label><select id="filter-category"><option value="">All</option><option value="UPI Fraud">UPI Fraud</option><option value="Social Media Harassment">Social Media Harassment</option><option value="Phishing Scam">Phishing Scam</option></select></div>
+                        <div class="filter-group"><label>Gender</label><select id="filter-gender"><option value="">All</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                        <div class="filter-group"><label>Min Age</label><input type="number" id="filter-min-age" placeholder="e.g., 18"></div>
+                        <div class="filter-group"><label>Max Age</label><input type="number" id="filter-max-age" placeholder="e.g., 60"></div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Case ID</th><th>Victim Name</th><th>Age</th><th>Gender</th><th>Category</th><th>Date</th><th>Status</th></tr></thead>
+                            <tbody id="complaints-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Case Details Modal -->
+    <div class="modal-overlay" id="case-details-modal">
+        <div class="modal-box">
+            <div class="modal-header"><h2>Case Details</h2><button class="modal-close-btn"><i data-lucide="x"></i></button></div>
+            <div class="modal-content">
+                <div>
+                    <h3>Victim Information</h3>
+                    <div class="detail-grid mt-4">
+                        <div class="detail-item"><strong>First Name:</strong> <span id="modal-victim-firstname"></span></div>
+                        <div class="detail-item"><strong>Last Name:</strong> <span id="modal-victim-lastname"></span></div>
+                        <div class="detail-item"><strong>Age:</strong> <span id="modal-victim-age"></span></div>
+                        <div class="detail-item"><strong>Gender:</strong> <span id="modal-victim-gender"></span></div>
+                        <div class="detail-item"><strong>Phone:</strong> <span id="modal-victim-phone"></span></div>
+                        <div class="detail-item"><strong>Email:</strong> <span id="modal-victim-email"></span></div>
+                    </div>
+                    <h3 class="mt-6">Incident Details</h3>
+                    <div class="detail-grid mt-4">
+                        <div class="detail-item"><strong>Case ID:</strong> <span id="modal-case-id"></span></div>
+                        <div class="detail-item"><strong>Source:</strong> <span id="modal-case-source"></span></div>
+                        <div class="detail-item"><strong>Category:</strong> <span id="modal-case-category"></span></div>
+                        <div class="detail-item"><strong>Sub-Category:</strong> <span id="modal-case-subcategory"></span></div>
+                    </div>
+                    <p id="modal-case-summary" class="mt-4 text-gray-300"></p>
+                    
+                    <div id="modal-financial-section" class="mt-6">
+                        <h3>Financial Loss Details</h3>
+                        <div class="detail-grid mt-4">
+                            <div class="detail-item"><strong>Bank Name:</strong> <span id="modal-financial-bank"></span></div>
+                            <div class="detail-item"><strong>Account Number:</strong> <span id="modal-financial-acc"></span></div>
+                            <div class="detail-item"><strong>Transaction ID:</strong> <span id="modal-financial-txn"></span></div>
+                            <div class="detail-item"><strong>Amount Lost:</strong> <span id="modal-financial-amount"></span></div>
+                        </div>
+                    </div>
+                    <div id="modal-suspect-section" class="mt-6">
+                        <h3>Suspect Information</h3>
+                        <div class="detail-grid mt-4">
+                             <div class="detail-item"><strong>Name:</strong> <span id="modal-suspect-name"></span></div>
+                             <div class="detail-item"><strong>Mobile:</strong> <span id="modal-suspect-mobile"></span></div>
+                        </div>
+                        <div class="detail-item mt-4"><strong>Other Details:</strong> <span id="modal-suspect-other"></span></div>
+                    </div>
+                    <div id="modal-evidence-section" class="mt-6">
+                        <h3>Evidence Files</h3>
+                        <div id="modal-file-list" class="mt-4 space-y-2"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3>Case Communication Log</h3>
+                    <div id="chat-log" class="chat-log mt-4"></div>
+                    <form id="chat-form" class="chat-form">
+                        <textarea id="chat-message-input" placeholder="Type message to victim..." rows="3"></textarea>
+                        <div class="text-right mt-2"><button type="submit" class="btn">Send</button></div>
+                    </form>
+                    <div id="action-panel" class="action-panel">
+                        <h3>Actions</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', () => {
+            let allComplaints = [ 
+                { id: 'NCSC-2025-88431', source: 'Website', category: 'UPI Fraud', subCategory: 'Fraudulent Transaction', status: 'New', date: '20-Aug-2025', victim: { firstName: 'Priya', lastName: 'Sharma', age: 22, gender: 'Female', phone: '91-9821100145', email: 'priya.sharma@email.com' }, summary: 'Victim was tricked into a fraudulent UPI transaction of ₹5,000 via a gaming website.', financial: { bank: 'HDFC Bank', account: '50100XXXXXX1234', txnId: 'UPI123456789', amount: '₹5,000' }, suspect: null, files: [{name: 'transaction_screenshot.png', type: 'image'}, {name: 'chat_history.pdf', type: 'pdf'}], chatHistory: [{author: 'Investigating Officer', timestamp: 'August 20, 2025, 10:00 AM', message: 'Case has been assigned. We are looking into the transaction details.'}] }, 
+                { id: 'NCSC-2025-88430', source: 'App', category: 'Social Media Harassment', subCategory: 'Cyber Stalking', status: 'Under Review', date: '20-Aug-2025', victim: { firstName: 'Amit', lastName: 'Verma', age: 28, gender: 'Male', phone: '91-9912233412', email: 'amit.verma@email.com' }, summary: 'Victim reports receiving direct threats of physical harm via social media DMs from a fake profile.', financial: null, suspect: { name: 'Unknown', mobile: 'N/A', other: 'Instagram Profile: @fake_user_123' }, files: [{name: 'threatening_messages.jpg', type: 'image'}], chatHistory: [] }, 
+                { id: 'NCSC-2025-88429', source: 'WhatsApp', category: 'Phishing Scam', subCategory: 'Phishing / Vishing Scam', status: 'Pending Partner Data', date: '19-Aug-2025', victim: { firstName: 'Sunita', lastName: 'Reddy', age: 45, gender: 'Female', phone: '91-9123344534', email: 'sunita.reddy@email.com' }, summary: 'Victim lost ₹1,50,000 in a sophisticated phishing scam impersonating a bank official.', financial: { bank: 'SBI', account: '3001XXXXXX5678', txnId: 'NEFT987654321', amount: '₹1,50,000' }, suspect: { name: 'Ramesh Kumar (Alleged)', mobile: '+91-8887776655', other: 'Called from a number that is now switched off.' }, files: [{name: 'bank_statement.pdf', type: 'pdf'}, {name: 'whatsapp_scam_chat.png', type: 'image'}], chatHistory: [{author: 'Investigating Officer', timestamp: 'August 19, 2025, 03:20 PM', message: 'We have initiated a request with the concerned bank for the fraudulent account details.'}] },
+            ];
+            
+            const tableBody = document.getElementById('complaints-table');
+            const caseModal = document.getElementById('case-details-modal');
+            const chatLog = document.getElementById('chat-log');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-message-input');
+            const actionPanel = document.getElementById('action-panel');
+            let currentCase = null;
+
+            function renderTable(complaints) {
+                tableBody.innerHTML = '';
+                complaints.forEach(c => {
+                    const row = document.createElement('tr');
+                    row.dataset.caseId = c.id;
+                    let statusClass = 'status-new';
+                    if (c.status === 'Under Review') statusClass = 'status-review';
+                    if (c.status === 'Pending Partner Data') statusClass = 'status-pending';
+                    row.innerHTML = `<td class="font-semibold">${c.id}</td><td>${c.victim.firstName} ${c.victim.lastName}</td><td>${c.victim.age}</td><td>${c.victim.gender}</td><td>${c.category}</td><td>${c.date}</td><td><span class="status-pill ${statusClass}">${c.status}</span></td>`;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            function applyFilters() {
+                const idFilter = document.getElementById('filter-id').value.toLowerCase();
+                const categoryFilter = document.getElementById('filter-category').value;
+                const genderFilter = document.getElementById('filter-gender').value;
+                const minAgeFilter = parseInt(document.getElementById('filter-min-age').value) || 0;
+                const maxAgeFilter = parseInt(document.getElementById('filter-max-age').value) || 999;
+                
+                const filteredData = allComplaints.filter(c => 
+                    c.id.toLowerCase().includes(idFilter) &&
+                    (categoryFilter === "" || c.category === categoryFilter) &&
+                    (genderFilter === "" || c.victim.gender === genderFilter) &&
+                    c.victim.age >= minAgeFilter &&
+                    c.victim.age <= maxAgeFilter
+                );
+                renderTable(filteredData);
+            }
+
+            document.querySelectorAll('#filter-id, #filter-category, #filter-gender, #filter-min-age, #filter-max-age').forEach(el => {
+                el.addEventListener('input', applyFilters);
+            });
+
+            function openCaseModal(caseId) {
+                currentCase = allComplaints.find(c => c.id === caseId);
+                if (!currentCase) return;
+                
+                document.getElementById('modal-victim-firstname').textContent = currentCase.victim.firstName;
+                document.getElementById('modal-victim-lastname').textContent = currentCase.victim.lastName;
+                document.getElementById('modal-victim-age').textContent = currentCase.victim.age;
+                document.getElementById('modal-victim-gender').textContent = currentCase.victim.gender;
+                document.getElementById('modal-victim-phone').textContent = currentCase.victim.phone;
+                document.getElementById('modal-victim-email').textContent = currentCase.victim.email;
+                document.getElementById('modal-case-id').textContent = currentCase.id;
+                document.getElementById('modal-case-source').textContent = currentCase.source;
+                document.getElementById('modal-case-category').textContent = currentCase.category;
+                document.getElementById('modal-case-subcategory').textContent = currentCase.subCategory;
+                document.getElementById('modal-case-summary').textContent = currentCase.summary;
+
+                const financialSection = document.getElementById('modal-financial-section');
+                if (currentCase.financial) {
+                    document.getElementById('modal-financial-bank').textContent = currentCase.financial.bank;
+                    document.getElementById('modal-financial-acc').textContent = currentCase.financial.account;
+                    document.getElementById('modal-financial-txn').textContent = currentCase.financial.txnId;
+                    document.getElementById('modal-financial-amount').textContent = currentCase.financial.amount;
+                    financialSection.style.display = 'block';
+                } else { financialSection.style.display = 'none'; }
+
+                const suspectSection = document.getElementById('modal-suspect-section');
+                if (currentCase.suspect) {
+                    document.getElementById('modal-suspect-name').textContent = currentCase.suspect.name;
+                    document.getElementById('modal-suspect-mobile').textContent = currentCase.suspect.mobile;
+                    document.getElementById('modal-suspect-other').textContent = currentCase.suspect.other;
+                    suspectSection.style.display = 'block';
+                } else { suspectSection.style.display = 'none'; }
+
+                const evidenceSection = document.getElementById('modal-evidence-section');
+                const fileList = document.getElementById('modal-file-list');
+                fileList.innerHTML = '';
+                if (currentCase.files && currentCase.files.length > 0) {
+                    currentCase.files.forEach(file => {
+                        const icon = file.type === 'pdf' ? 'file-text' : 'image';
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-list-item';
+                        fileItem.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span>${file.name}</span>`;
+                        fileList.appendChild(fileItem);
+                    });
+                    evidenceSection.style.display = 'block';
+                } else {
+                    evidenceSection.style.display = 'none';
+                }
+
+
+                actionPanel.innerHTML = '<h3>Actions</h3>';
+                if (currentCase.financial) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn';
+                    btn.innerHTML = '<i data-lucide="banknote"></i><span>Request Account Block & Refund</span>';
+                    btn.onclick = () => takeAction('financial');
+                    actionPanel.appendChild(btn);
+                }
+                if (currentCase.category === 'Social Media Harassment') {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn';
+                    btn.innerHTML = '<i data-lucide="trash-2"></i><span>Request Content Takedown</span>';
+                    btn.onclick = () => takeAction('social');
+                    actionPanel.appendChild(btn);
+                }
+                if (!currentCase.financial && currentCase.category !== 'Social Media Harassment') {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn';
+                    btn.innerHTML = '<i data-lucide="play"></i><span>Initiate Investigation</span>';
+                    btn.onclick = () => takeAction('general');
+                    actionPanel.appendChild(btn);
+                }
+                lucide.createIcons();
+
+                renderChat(currentCase.chatHistory);
+                caseModal.style.display = 'flex';
+            }
+
+            function takeAction(type) {
+                if (!currentCase) return;
+                let logMessage = '';
+                if (type === 'financial') {
+                    logMessage = `Request sent to ${currentCase.financial.bank} for account block and refund.`;
+                    currentCase.status = 'Pending Partner Data';
+                } else if (type === 'social') {
+                    logMessage = `Content takedown request sent for suspect profile: ${currentCase.suspect.other}.`;
+                    currentCase.status = 'Pending Partner Data';
+                } else {
+                    logMessage = 'Investigation initiated. Victim will be contacted shortly.';
+                    currentCase.status = 'Under Review';
+                }
+                
+                const now = new Date();
+                currentCase.chatHistory.push({
+                    author: 'System',
+                    message: `ACTION: ${logMessage}`,
+                    timestamp: now.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
+                });
+                
+                alert(logMessage);
+                renderTable(allComplaints);
+                closeModal();
+            }
+
+            function renderChat(chatHistory) {
+                chatLog.innerHTML = '';
+                chatHistory.forEach(msg => appendMessage(msg));
+            }
+
+            function appendMessage(msg) {
+                const messageEl = document.createElement('div');
+                const isOfficer = msg.author === 'Investigating Officer';
+                messageEl.className = `chat-message ${isOfficer ? 'user-message' : ''}`;
+                const authorIcon = isOfficer ? 'shield' : 'user';
+                
+                messageEl.innerHTML = `<div class="avatar"><i data-lucide="${authorIcon}"></i></div><div class="message-content"><div class="message-author">${msg.author}</div><p class="message-text">${msg.message}</p><div class="message-time">${msg.timestamp || ''}</div></div>`;
+                chatLog.appendChild(messageEl);
+                lucide.createIcons();
+                chatLog.scrollTop = chatLog.scrollHeight;
+            }
+
+            tableBody.addEventListener('click', (e) => {
+                const row = e.target.closest('tr');
+                if (row) openCaseModal(row.dataset.caseId);
+            });
+
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const text = chatInput.value.trim();
+                if (text && currentCase) {
+                    const now = new Date();
+                    const newMessage = { 
+                        author: 'Investigating Officer', 
+                        message: text,
+                        timestamp: now.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
+                    };
+                    currentCase.chatHistory.push(newMessage);
+                    appendMessage(newMessage);
+                    chatInput.value = '';
+                }
+            });
+
+            caseModal.querySelector('.modal-close-btn').addEventListener('click', () => closeModal());
+            function closeModal() {
+                caseModal.style.display = 'none';
+            }
+            window.addEventListener('click', (e) => { if (e.target === caseModal) closeModal(); });
+            
+            renderTable(allComplaints);
+
+            // Theme switcher logic
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const sunIcon = document.getElementById('theme-toggle-sun');
+            const moonIcon = document.getElementById('theme-toggle-moon');
+
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                sunIcon.classList.toggle('hidden');Q
+                moonIcon.classList.toggle('hidden');
+                if (document.body.classList.contains('light-theme')) {
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    localStorage.removeItem('theme');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

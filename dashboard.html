@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CENSE Enforcement Portal - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-color: #f97316; /* Vibrant Orange */
+            --primary-hover: #fb923c;
+            --bg-dark-primary: #111111;  /* Near Black */
+            --bg-dark-secondary: #1e1e1e; /* Panel/Card background */
+            --border-dark: #333333;
+            --text-light-primary: #f5f5f5; /* Off-white */
+            --text-light-secondary: #a3a3a3; /* Medium Grey */
+            --danger-color: #ef4444;
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark-primary); color: var(--text-light-secondary); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        h1, h2, h3 { font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--text-light-primary); }
+        .sidebar { background-color: var(--bg-dark-secondary); border-right: 1px solid var(--border-dark); }
+        .sidebar-header h1 { font-size: 1.5rem; font-weight: 900; }
+        .sidebar-nav a { transition: all 0.2s; }
+        .sidebar-nav a:hover { background-color: #333333; color: var(--text-light-primary); }
+        .sidebar-nav a.active { background-color: var(--primary-color); color: #ffffff; font-weight: 600; box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
+        .top-header { background-color: var(--bg-dark-secondary); border-bottom: 1px solid var(--border-dark); }
+        .panel, .stat-card { background-color: var(--bg-dark-secondary); border-radius: 0.5rem; position: relative; border: 1px solid var(--border-dark); clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px)); transition: all 0.3s ease; opacity: 0; animation: fadeInUp 0.5s ease forwards; }
+        .panel::before, .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 0.5rem; clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px)); padding: 1px; background: linear-gradient(45deg, var(--border-dark), #333333); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; transition: all 0.3s ease; }
+        .panel:hover::before, .stat-card:hover::before { background: linear-gradient(45deg, var(--primary-color), var(--primary-hover)); }
+        .stat-card .value { color: var(--primary-color); text-shadow: 0 0 8px rgba(249, 115, 22, 0.5); }
+        main { background-image: linear-gradient(rgba(48, 54, 61, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(48, 54, 61, 0.5) 1px, transparent 1px); background-size: 2rem 2rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        tbody tr { cursor: pointer; }
+        tbody tr:hover { background-color: #30363d; }
+        tbody tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); }
+        th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border-dark); }
+        th { font-weight: 600; color: var(--text-light-secondary); background-color: #30363d; font-family: 'Inter', sans-serif; }
+        td .font-semibold { color: var(--text-light-primary); }
+        .status-pill { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 500; font-size: 0.75rem; }
+        .status-new { background-color: rgba(239, 68, 68, 0.1); color: #f87171; }
+        .status-review { background-color: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+        .status-pending { background-color: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: var(--primary-color); color: white; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 15px rgba(249, 115, 22, 0.3); }
+        .btn:hover { background-color: var(--primary-hover); box-shadow: 0 0 20px rgba(251, 146, 60, 0.5); }
+        
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(17, 24, 39, 0.8); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .modal-box { background-color: var(--bg-dark-secondary); border-radius: 0.75rem; border: 1px solid var(--border-dark); width: 100%; max-width: 42rem; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-dark); }
+        .modal-header h2 { font-size: 1.25rem; }
+        .modal-close-btn { background: none; border: none; cursor: pointer; color: var(--text-light-secondary); }
+        .modal-content { padding: 1.5rem; overflow-y: auto; }
+        .modal-footer { padding: 1.5rem; border-top: 1px solid var(--border-dark); text-align: right; background-color: var(--bg-dark-secondary); border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem;}
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label { display: block; font-size: 0.875rem; font-weight: 500; color: var(--text-light-secondary); margin-bottom: 0.5rem; }
+        .input-group input, .input-group select { width: 100%; border: 1px solid var(--border-dark); border-radius: 0.5rem; padding: 0.6rem 1rem; box-sizing: border-box; background-color: var(--bg-dark-primary); color: var(--text-light-primary); }
+        .input-group input:focus, .input-group select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3); }
+        .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; font-size: 0.9rem; margin-top: 1.5rem; }
+        .detail-item strong { display: block; color: var(--text-light-secondary); font-weight: 500; }
+        .detail-item span { color: var(--text-light-primary); font-weight: 600; }
+    </style>
+</head>
+
+<body>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 flex-shrink-0">
+            <div class="sidebar-header p-4 flex items-center gap-3">
+                <i data-lucide="shield-check" class="text-orange-400"></i>
+                <h1>CENSE</h1>
+            </div>
+            <nav class="sidebar-nav p-4 space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 p-2 rounded-lg active"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span></a>
+                <a href="all-complaints.html" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="file-text" class="w-5 h-5"></i><span>All Complaints</span></a>
+                <a href="partner-requests.html" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i><span>Partner Requests</span></a>
+                <a href="ai-crime-radar.html" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="radar" class="w-5 h-5"></i><span>AI Crime Radar</span></a>
+                <a href="watchlist.html" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="list-checks" class="w-5 h-5"></i><span>Watchlist</span></a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="top-header p-4 flex justify-between items-center">
+                <h2 class="text-xl">Enforcement Dashboard</h2>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-400">Welcome, Inspector Sharma</span>
+                    <button class="btn" id="create-request-btn"><i data-lucide="plus-circle" class="w-4 h-4"></i><span>Create Request</span></button>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="stat-card p-4"><p class="text-sm text-gray-400">New Complaints (24h)</p><p class="text-3xl font-bold value">128</p></div>
+                    <div class="stat-card p-4"><p class="text-sm text-gray-400">AI Alerts Triggered</p><p class="text-3xl font-bold value">4</p></div>
+                    <div class="stat-card p-4"><p class="text-sm text-gray-400">Linked Cases Found</p><p class="text-3xl font-bold value">18</p></div>
+                    <div class="stat-card p-4"><p class="text-sm text-gray-400">Watchlist Reports</p><p class="text-3xl font-bold value">72</p></div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Main Panel: High Priority Cases -->
+                    <div class="panel lg:col-span-2 p-0">
+                        <h3 class="text-lg p-4">High Priority Cases</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Case ID</th><th>Category</th><th>Priority Reason</th><th>Status</th></tr></thead>
+                                <tbody id="complaints-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Side Panel: AI Radar & Watchlist -->
+                    <div class="space-y-6">
+                        <a href="ai-crime-radar.html" class="panel block">
+                            <h3 class="text-lg p-4">AI Crime Radar</h3>
+                            <ul class="p-4 pt-0 space-y-4" id="ai-alerts-list"></ul>
+                        </a>
+                        <a href="watchlist.html" class="panel block">
+                            <h3 class="text-lg p-4">Indore Cyber Shield Watchlist</h3>
+                            <ul class="p-4 pt-0 space-y-4" id="watchlist-list"></ul>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Repeat Offenders Panel -->
+                <div class="panel mt-6 p-0">
+                    <h3 class="text-lg p-4">AI-Flagged Repeat Offenders</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Identifier (UPI/Phone)</th><th>Linked Cases</th><th>Last Activity</th><th>Risk Level</th></tr></thead>
+                            <tbody id="offenders-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="request-modal">
+        <div class="modal-box">
+            <div class="modal-header"><h2>Create Data Request</h2><button class="modal-close-btn"><i data-lucide="x"></i></button></div>
+            <div class="modal-content"><div class="input-group"><label for="platform">Select Platform</label><select id="platform"><option>WhatsApp</option><option>Google</option><option>Facebook</option><option>Jio</option></select></div><div class="input-group"><label for="country">Platform Country</label><select id="country"><option>India</option><option>USA</option><option>Ireland</option></select></div><div class="input-group"><label for="data-type">Type of Data Required</label><select id="data-type"><option>Metadata (IP, Creation Time, etc.)</option><option>Subscriber Details</option><option>Call Detail Records (CDR)</option></select></div><div class="input-group"><label for="case-id-input">Link to Case ID</label><input type="text" id="case-id-input" placeholder="e.g., NCSC-2025-88431"></div></div>
+            <div class="modal-footer"><button class="btn" id="generate-form-btn"><i data-lucide="file-check-2" class="w-4 h-4"></i><span>Generate Legal Form</span></button></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="case-details-modal">
+        <div class="modal-box">
+            <div class="modal-header"><h2>Case Details</h2><button class="modal-close-btn"><i data-lucide="x"></i></button></div>
+            <div class="modal-content">
+                <div class="detail-grid">
+                    <div class="detail-item"><strong>Case ID:</strong> <span id="modal-case-id"></span></div>
+                    <div class="detail-item"><strong>Category:</strong> <span id="modal-case-category"></span></div>
+                    <div class="detail-item"><strong>Victim Name:</strong> <span id="modal-victim-name"></span></div>
+                    <div class="detail-item"><strong>Victim Contact:</strong> <span id="modal-victim-contact"></span></div>
+                </div>
+                <p id="modal-case-summary" class="mt-4 text-gray-300"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', () => {
+            const complaints = [ 
+                { id: 'NCSC-2025-88431', source: 'Website', category: 'UPI Fraud', linked: 3, status: 'New', priority: 'Minor Victim', summary: 'Victim, a minor, was tricked into a fraudulent UPI transaction of ₹5,000 via a gaming website.', victim: { name: 'Aarav S.', contact: '91-982XXXXX45' } }, 
+                { id: 'NCSC-2025-88430', source: 'App', category: 'Social Media Harassment', linked: 0, status: 'Under Review', priority: 'Immediate Threat', summary: 'Victim reports receiving direct threats of physical harm via social media DMs.', victim: { name: 'Neha P.', contact: '91-991XXXXX12' } }, 
+                { id: 'NCSC-2025-88429', source: 'WhatsApp', category: 'Phishing Scam', linked: 0, status: 'Pending Partner Data', priority: 'Financial Loss > 1 Lakh', summary: 'Victim lost ₹1,50,000 in a sophisticated phishing scam impersonating a bank official.', victim: { name: 'Rajesh K.', contact: '91-912XXXXX34' } },
+            ];
+            const aiAlerts = [ { type: 'Trending Scam', text: 'Spike in "Electricity Bill" complaints detected.' }, { type: 'Linked Cases', text: 'UPI ID "scammer@upi" linked to 3 new cases.' }, ];
+            const watchlistItems = [ { type: 'App', text: 'QuickLoan.apk (120 reports)', action: 'Report to Google' }, { type: 'Number', text: '+91-8887776665 (88 reports)', action: 'Report to Sanchar Saathi' }, ];
+            const repeatOffenders = [ { id: 'scammer@upi', linked: 11, lastActivity: '20-Aug-2025', risk: 'High' }, { id: '+91-9876543210', linked: 7, lastActivity: '18-Aug-2025', risk: 'High' }, { id: 'fake.profile@insta', linked: 4, lastActivity: '15-Aug-2025', risk: 'Medium' } ];
+            
+            function renderComplaints() {
+                const tableBody = document.getElementById('complaints-table');
+                tableBody.innerHTML = '';
+                complaints.forEach(c => {
+                    const row = document.createElement('tr');
+                    row.dataset.caseId = c.id;
+                    row.innerHTML = `<td class="font-semibold">${c.id}</td><td>${c.category}</td><td class="font-semibold text-red-400">${c.priority}</td><td><span class="status-pill status-new">${c.status}</span></td>`;
+                    tableBody.appendChild(row);
+                });
+            }
+            function renderAiAlerts() {
+                const list = document.getElementById('ai-alerts-list');
+                list.innerHTML = '';
+                aiAlerts.forEach(a => { list.innerHTML += `<li class="flex items-start gap-3"><i data-lucide="siren" class="w-5 h-5 text-red-500 mt-1 flex-shrink-0"></i><div><p class="font-semibold text-white">${a.type}</p><p class="text-sm text-gray-400">${a.text}</p></div></li>`; });
+            }
+            function renderWatchlist() {
+                const list = document.getElementById('watchlist-list');
+                list.innerHTML = '';
+                watchlistItems.forEach(w => { list.innerHTML += `<li class="flex items-center justify-between gap-3"><div class="flex items-center gap-3"><i data-lucide="${w.type === 'App' ? 'smartphone' : 'phone'}" class="w-5 h-5 text-gray-500"></i><p class="text-sm font-medium text-gray-300">${w.text}</p></div><button class="btn-danger text-xs px-2 py-1">${w.action}</button></li>`; });
+            }
+            function renderRepeatOffenders() {
+                const tableBody = document.getElementById('offenders-table');
+                tableBody.innerHTML = '';
+                repeatOffenders.forEach(o => {
+                    const riskColor = o.risk === 'High' ? 'text-red-400' : 'text-amber-400';
+                    tableBody.innerHTML += `<tr><td class="font-semibold">${o.id}</td><td class="font-bold text-orange-400">${o.linked}</td><td>${o.lastActivity}</td><td><span class="font-bold ${riskColor}">${o.risk}</span></td></tr>`;
+                });
+            }
+
+            const requestModal = document.getElementById('request-modal');
+            const createRequestBtn = document.getElementById('create-request-btn');
+            createRequestBtn.addEventListener('click', () => requestModal.style.display = 'flex');
+            requestModal.querySelector('.modal-close-btn').addEventListener('click', () => requestModal.style.display = 'none');
+            
+            const caseModal = document.getElementById('case-details-modal');
+            caseModal.querySelector('.modal-close-btn').addEventListener('click', () => caseModal.style.display = 'none');
+
+            document.getElementById('complaints-table').addEventListener('click', (e) => {
+                const row = e.target.closest('tr');
+                if (!row) return;
+                const caseId = row.dataset.caseId;
+                const caseData = complaints.find(c => c.id === caseId);
+                if (caseData) {
+                    document.getElementById('modal-case-id').textContent = caseData.id;
+                    document.getElementById('modal-case-category').textContent = caseData.category;
+                    document.getElementById('modal-victim-name').textContent = caseData.victim.name;
+                    document.getElementById('modal-victim-contact').textContent = caseData.victim.contact;
+                    document.getElementById('modal-case-summary').textContent = caseData.summary;
+                    caseModal.style.display = 'flex';
+                }
+            });
+
+            window.addEventListener('click', (e) => { 
+                if (e.target === requestModal) requestModal.style.display = 'none'; 
+                if (e.target === caseModal) caseModal.style.display = 'none'; 
+            });
+            
+            renderComplaints();
+            renderAiAlerts();
+            renderWatchlist();
+            renderRepeatOffenders();
+            lucide.createIcons();
+
+            document.querySelectorAll('.stat-card, .panel').forEach((el, index) => {
+                el.style.animationDelay = `${index * 100}ms`;
+            });
+        });
+    </script>
+</body>
+
+</html>

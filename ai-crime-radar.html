@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CENSE Portal - AI Crime Radar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-color: #f97316;
+            /* Vibrant Orange */
+            --primary-hover: #fb923c;
+            --bg-dark-primary: #111111;
+            /* Near Black */
+            --bg-dark-secondary: #1e1e1e;
+            /* Panel/Card background */
+            --border-dark: #333333;
+            --text-light-primary: #f5f5f5;
+            /* Off-white */
+            --text-light-secondary: #a3a3a3;
+            /* Medium Grey */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark-primary);
+            color: var(--text-light-secondary);
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--text-light-primary);
+        }
+
+        .sidebar {
+            background-color: var(--bg-dark-secondary);
+            border-right: 1px solid var(--border-dark);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: #30363d;
+            color: var(--text-light-primary);
+        }
+
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+        }
+
+        .top-header {
+            background-color: var(--bg-dark-secondary);
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .panel {
+            background-color: var(--bg-dark-secondary);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-dark);
+            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+        }
+
+        main {
+            background-image: linear-gradient(rgba(48, 54, 61, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(48, 54, 61, 0.5) 1px, transparent 1px);
+            background-size: 2rem 2rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        tbody tr {
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background-color: #30363d;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-light-secondary);
+            background-color: #30363d;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .details-panel {
+            display: none;
+        }
+
+        .hotspot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(249, 115, 22, 0.8);
+            border-radius: 50%;
+            cursor: pointer;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.8; }
+        }
+
+        .hotspot-tooltip {
+            position: absolute;
+            background-color: rgba(30, 30, 30, 0.95);
+            border: 1px solid var(--border-dark);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            display: none;
+            z-index: 20;
+            transform: translate(-50%, -120%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="flex h-screen">
+        <div class="sidebar w-64 flex-shrink-0">
+            <div class="sidebar-header p-4 flex items-center gap-3"><i data-lucide="shield-check"
+                    class="text-orange-400"></i>
+                <h1>CENSE</h1>
+            </div>
+            <nav class="sidebar-nav p-4 space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 p-2 rounded-lg"><i
+                        data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span></a>
+                <a href="all-complaints.html" class="flex items-center gap-3 p-2 rounded-lg"><i
+                        data-lucide="file-text" class="w-5 h-5"></i><span>All Complaints</span></a>
+                <a href="partner-requests.html" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="users"
+                        class="w-5 h-5"></i><span>Partner Requests</span></a>
+                <a href="ai-crime-radar.html" class="flex items-center gap-3 p-2 rounded-lg active"><i
+                        data-lucide="radar" class="w-5 h-5"></i><span>AI Crime Radar</span></a>
+                <a href="watchlist.html" class="flex items-center gap-3 p-2 rounded-lg"><i
+                        data-lucide="list-checks" class="w-5 h-5"></i><span>Watchlist</span></a>
+            </nav>
+        </div>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="top-header p-4">
+                <h2 class="text-xl">AI Crime Radar</h2>
+            </header>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 flex gap-6">
+                <div id="main-content" class="flex-1 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="panel p-4 col-span-1 md:col-span-2 lg:col-span-1">
+                            <h3 class="text-lg mb-4 text-orange-400 flex items-center gap-2">
+                                <i data-lucide="siren" class="w-5 h-5"></i>
+                                Emerging Threat Alerts
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="bg-gray-900 p-4 rounded-md border border-red-500/50">
+                                    <p class="font-semibold text-red-400">High Priority: "Electricity Bill" Scam</p>
+                                    <p class="text-sm mt-1 text-gray-400">
+                                        AI models have detected a **450% spike** in complaints related to fake electricity bill messages. Scammers are primarily targeting senior citizens and small business owners in urban areas using spoofed SMS and WhatsApp links.
+                                    </p>
+                                </div>
+                                <div class="bg-gray-900 p-4 rounded-md border border-amber-500/50">
+                                    <p class="font-semibold text-amber-400">Medium Priority: "FedEx KYC" Scam</p>
+                                    <p class="text-sm mt-1 text-gray-400">
+                                        A growing trend of fraudulent calls impersonating FedEx agents has been identified. This scam, which asks for KYC details and a small fee, is particularly active in the North Indore region.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel p-4 col-span-1 md:col-span-2">
+                            <h3 class="text-lg mb-4 text-orange-400 flex items-center gap-2">
+                                <i data-lucide="map-pin" class="w-5 h-5"></i>
+                                Live Crime Hotspots
+                            </h3>
+                            <div id="map-container" class="bg-gray-900 h-64 rounded-md relative overflow-hidden">
+                                <div class="absolute inset-0 z-0 bg-cover bg-center opacity-30" style="background-image: url('https://map.wikimedia.org/osm-intl/12/3592/2065.png');"></div>
+                                
+                                <div class="hotspot" style="top: 40%; left: 30%;" data-title="High Spike: Electricity Bill Scam" data-details="450% increase in complaints. Scammers target senior citizens in this region."></div>
+                                <div class="hotspot-tooltip" style="top: 40%; left: 30%;"></div>
+                                
+                                <div class="hotspot" style="top: 60%; left: 60%;" data-title="Emerging Threat: FedEx KYC Scam" data-details="Growing trend detected. Scammers use fraudulent calls to get personal information."></div>
+                                <div class="hotspot-tooltip" style="top: 60%; left: 60%;"></div>
+
+                                <div class="hotspot" style="top: 50%; left: 80%;" data-title="Job Scam Alert" data-details="AI identified multiple complaints about fake job offers requiring an 'application fee'."></div>
+                                <div class="hotspot-tooltip" style="top: 50%; left: 80%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel p-0">
+                        <h3 class="text-lg px-6 pt-4 text-orange-400 flex items-center gap-2">
+                            <i data-lucide="link" class="w-5 h-5"></i>
+                            Recent AI-Linked Cases
+                        </h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Link ID</th>
+                                    <th>Identifier</th>
+                                    <th>Type</th>
+                                    <th>Linked Cases</th>
+                                    <th>Last Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody id="linked-cases-table-body">
+                                <tr data-link-id="LNK-7B9C4" data-identifier="scammer@upi" data-type="UPI ID" data-linked-count="11" data-last-updated="20-Aug-2025" data-complaints='["NCSC-2025-88429", "NCSC-2025-88421", "NCSC-2025-88415", "NCSC-2025-88411", "NCSC-2025-88407", "NCSC-2025-88401", "NCSC-2025-88398", "NCSC-2025-88392", "NCSC-2025-88388", "NCSC-2025-88381", "NCSC-2025-88375"]'>
+                                    <td class="font-semibold text-white">LNK-7B9C4</td>
+                                    <td>scammer@upi</td>
+                                    <td>UPI ID</td>
+                                    <td>11</td>
+                                    <td>20-Aug-2025</td>
+                                </tr>
+                                <tr data-link-id="LNK-7B9C3" data-identifier="+91-9876543210" data-type="Phone Number" data-linked-count="7" data-last-updated="19-Aug-2025" data-complaints='["NCSC-2025-88422", "NCSC-2025-88418", "NCSC-2025-88414", "NCSC-2025-88409", "NCSC-2025-88404", "NCSC-2025-88399", "NCSC-2025-88395"]'>
+                                    <td class="font-semibold text-white">LNK-7B9C3</td>
+                                    <td>+91-9876543210</td>
+                                    <td>Phone Number</td>
+                                    <td>7</td>
+                                    <td>19-Aug-2025</td>
+                                </tr>
+                                <tr data-link-id="LNK-7B9C2" data-identifier="48.204.1.200" data-type="IP Address" data-linked-count="22" data-last-updated="18-Aug-2025" data-complaints='["NCSC-2025-88417", "NCSC-2025-88416", "NCSC-2025-88413", "NCSC-2025-88410", "NCSC-2025-88408", "NCSC-2025-88405", "NCSC-2025-88402", "NCSC-2025-88397", "NCSC-2025-88394", "NCSC-2025-88391", "NCSC-2025-88389", "NCSC-2025-88386", "NCSC-2025-88382", "NCSC-2025-88379", "NCSC-2025-88376", "NCSC-2025-88372", "NCSC-2025-88368", "NCSC-2025-88365", "NCSC-2025-88362", "NCSC-2025-88358", "NCSC-2025-88355", "NCSC-2025-88351"]'>
+                                    <td class="font-semibold text-white">LNK-7B9C2</td>
+                                    <td>48.204.1.200</td>
+                                    <td>IP Address</td>
+                                    <td>22</td>
+                                    <td>18-Aug-2025</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="link-details-panel" class="details-panel w-96 flex-shrink-0 panel p-6 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl" id="details-header"></h3>
+                        <button id="close-details" class="text-gray-400 hover:text-white transition-colors">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Link ID</p>
+                        <p class="font-semibold text-white" id="details-link-id"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Identifier</p>
+                        <p class="font-semibold text-white" id="details-identifier"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Type</p>
+                        <p class="font-semibold text-white" id="details-type"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Linked Cases</p>
+                        <ul class="list-disc list-inside mt-2 text-sm text-gray-400 space-y-1" id="details-linked-cases"></ul>
+                    </div>
+                    <div class="pt-4 space-y-3">
+                        <button class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition-colors" id="add-to-watchlist-btn">
+                            <i data-lucide="plus" class="inline-block w-4 h-4 mr-2"></i>
+                            Add to Watchlist
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        lucide.createIcons();
+
+        // Table details panel logic
+        const tableBody = document.getElementById('linked-cases-table-body');
+        const detailsPanel = document.getElementById('link-details-panel');
+        const closeButton = document.getElementById('close-details');
+        
+        tableBody.addEventListener('click', (event) => {
+            const row = event.target.closest('tr');
+            if (row) {
+                const linkId = row.getAttribute('data-link-id');
+                const identifier = row.getAttribute('data-identifier');
+                const type = row.getAttribute('data-type');
+                const complaintsData = JSON.parse(row.getAttribute('data-complaints'));
+                
+                document.getElementById('details-header').textContent = `Linked ID Details`;
+                document.getElementById('details-link-id').textContent = linkId;
+                document.getElementById('details-identifier').textContent = identifier;
+                document.getElementById('details-type').textContent = type;
+                
+                const complaintsList = document.getElementById('details-linked-cases');
+                complaintsList.innerHTML = '';
+                complaintsData.forEach(complaint => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = complaint;
+                    complaintsList.appendChild(listItem);
+                });
+                
+                detailsPanel.style.display = 'block';
+            }
+        });
+        
+        closeButton.addEventListener('click', () => {
+            detailsPanel.style.display = 'none';
+        });
+
+        // Map hotspot logic
+        const mapContainer = document.getElementById('map-container');
+        const hotspots = mapContainer.querySelectorAll('.hotspot');
+        const tooltips = mapContainer.querySelectorAll('.hotspot-tooltip');
+
+        hotspots.forEach((hotspot, index) => {
+            const tooltip = tooltips[index];
+            const title = hotspot.getAttribute('data-title');
+            const details = hotspot.getAttribute('data-details');
+            
+            tooltip.innerHTML = `<p class="font-bold text-orange-400">${title}</p><p class="mt-1">${details}</p>`;
+
+            hotspot.addEventListener('mouseover', () => {
+                tooltips.forEach(t => t.style.display = 'none');
+                tooltip.style.display = 'block';
+            });
+
+            hotspot.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+
+</html>

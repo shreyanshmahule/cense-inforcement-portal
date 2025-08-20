@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CENSE Portal - Watchlist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0d1117; color: #7d8590; }
+        h1, h2, h3 { font-family: 'Orbitron', sans-serif; font-weight: 700; color: #e6edf3; }
+        .sidebar { background-color: #161b22; border-right: 1px solid #30363d; }
+        .sidebar-header h1 { font-size: 1.5rem; font-weight: 900; }
+        .sidebar-nav a:hover { background-color: #30363d; color: #e6edf3; }
+        .sidebar-nav a.active { background-color: #f97316; color: #ffffff; font-weight: 600; box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
+        .top-header { background-color: #161b22; border-bottom: 1px solid #30363d; }
+        .panel { background-color: #161b22; border-radius: 0.5rem; border: 1px solid #30363d; clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px)); }
+        main { background-image: linear-gradient(rgba(48, 54, 61, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(48, 54, 61, 0.5) 1px, transparent 1px); background-size: 2rem 2rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        tbody tr:hover { background-color: #30363d; cursor: pointer; }
+        th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid #30363d; }
+        th { font-weight: 600; color: #7d8590; background-color: #30363d; font-family: 'Inter', sans-serif; }
+        .btn-action { background-color: #f97316; color: white; padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.8rem; border: none; cursor: pointer; transition: background-color 0.2s, transform 0.1s; }
+        .btn-action:hover { background-color: #ea580c; transform: translateY(-1px); }
+        .btn-action:active { transform: translateY(0); }
+        .details-panel, .modal { display: none; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen">
+        <div class="sidebar w-64 flex-shrink-0">
+            <div class="sidebar-header p-4 flex items-center gap-3">
+                <i data-lucide="shield-check" class="text-orange-400"></i>
+                <h1>CENSE</h1>
+            </div>
+            <nav class="sidebar-nav p-4 space-y-2">
+                <a href="/zpolice/dashboard.html" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span></a>
+                <a href="#" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="file-text" class="w-5 h-5"></i><span>All Complaints</span></a>
+                <a href="#" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i><span>Partner Requests</span></a>
+                <a href="#" class="flex items-center gap-3 p-2 rounded-lg"><i data-lucide="radar" class="w-5 h-5"></i><span>AI Crime Radar</span></a>
+                <a href="#" class="flex items-center gap-3 p-2 rounded-lg active"><i data-lucide="list-checks" class="w-5 h-5"></i><span>Watchlist</span></a>
+            </nav>
+        </div>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="top-header p-4">
+                <h2 class="text-xl text-orange-400">Indore Cyber Shield Watchlist</h2>
+            </header>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="watchlist-grid">
+                    <div class="panel p-0">
+                        <h3 class="text-lg p-4 bg-gray-700 rounded-t-lg">Suspicious Apps</h3>
+                        <div class="table-container">
+                            <table class="w-full">
+                                <thead>
+                                    <tr>
+                                        <th>App Name / ID</th>
+                                        <th>Reports</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="apps-tbody">
+                                    <tr data-id="QuickLoan.apk" onclick="showDetails('app', this)">
+                                        <td class="font-semibold">QuickLoan.apk</td>
+                                        <td>120</td>
+                                        <td>
+                                            <button class="btn-action" onclick="event.stopPropagation(); showReportConfirm('QuickLoan.apk', 'Google')">Report to Google</button>
+                                            <button class="btn-action ml-2" onclick="event.stopPropagation(); showReportConfirm('QuickLoan.apk', 'Apple')">Report to Apple</button>
+                                        </td>
+                                    </tr>
+                                    <tr data-id="FreeCash.apk" onclick="showDetails('app', this)">
+                                        <td class="font-semibold">FreeCash.apk</td>
+                                        <td>95</td>
+                                        <td>
+                                            <button class="btn-action" onclick="event.stopPropagation(); showReportConfirm('FreeCash.apk', 'Google')">Report to Google</button>
+                                            <button class="btn-action ml-2" onclick="event.stopPropagation(); showReportConfirm('FreeCash.apk', 'Apple')">Report to Apple</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="panel p-0">
+                        <h3 class="text-lg p-4 bg-gray-700 rounded-t-lg">Suspicious Numbers</h3>
+                        <div class="table-container">
+                            <table class="w-full">
+                                <thead>
+                                    <tr>
+                                        <th>Phone Number</th>
+                                        <th>Reports</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="numbers-tbody">
+                                    <tr data-id="+91-8887776665" onclick="showDetails('number', this)">
+                                        <td class="font-semibold">+91-8887776665</td>
+                                        <td>88</td>
+                                        <td><button class="btn-action" onclick="event.stopPropagation(); showReportConfirm('+91-8887776665', 'Sanchar Saathi')">Report to Sanchar Saathi</button></td>
+                                    </tr>
+                                    <tr data-id="+91-8887776664" onclick="showDetails('number', this)">
+                                        <td class="font-semibold">+91-8887776664</td>
+                                        <td>62</td>
+                                        <td><button class="btn-action" onclick="event.stopPropagation(); showReportConfirm('+91-8887776664', 'Sanchar Saathi')">Report to Sanchar Saathi</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="details-view" class="details-panel mt-6 p-6">
+                    <div class="flex justify-between items-center border-b border-gray-700 pb-4 mb-4">
+                        <h3 class="text-xl font-orbitron text-orange-400" id="details-title"></h3>
+                        <button class="text-gray-400 hover:text-white" onclick="closeDetails()">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <div id="details-content" class="text-sm space-y-3">
+                        </div>
+                </div>
+
+                <div id="confirm-modal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-70">
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-xl border border-gray-700 w-96 fade-in">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-bold text-white">Confirm Report</h4>
+                            <button class="text-gray-400 hover:text-white" onclick="closeConfirmModal()">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p id="confirm-message" class="text-gray-300 mb-6"></p>
+                        <div class="flex justify-end gap-3">
+                            <button class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700" onclick="closeConfirmModal()">Cancel</button>
+                            <button id="confirm-button" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        lucide.createIcons();
+
+        // Mock data for demonstration
+        const mockData = {
+            apps: {
+                "QuickLoan.apk": {
+                    name: "QuickLoan.apk",
+                    id: "com.quickloan.app",
+                    reports: 120,
+                    description: "A fraudulent loan app with high interest rates and malicious permissions. It has been linked to numerous cyber-scams and data theft cases. We recommend immediate action for removal.",
+                    permissions: ["READ_SMS", "READ_CONTACTS", "ACCESS_FINE_LOCATION"],
+                    last_seen: "2025-08-18"
+                },
+                "FreeCash.apk": {
+                    name: "FreeCash.apk",
+                    id: "com.freecash.rewards",
+                    reports: 95,
+                    description: "An app that promises rewards for watching ads but never pays out. It's classified as malware, with reports of phishing attempts and device manipulation. Action is needed to protect users.",
+                    permissions: ["SYSTEM_ALERT_WINDOW", "BIND_ACCESSIBILITY_SERVICE"],
+                    last_seen: "2025-08-17"
+                }
+            },
+            numbers: {
+                "+91-8887776665": {
+                    number: "+91-8887776665",
+                    reports: 88,
+                    carrier: "Jio",
+                    location: "Jaipur, Rajasthan",
+                    type: "Fraud Call Center",
+                    description: "This number is associated with a fake lottery scam. Callers pretend to be from a government department and ask for personal bank details to process prize money."
+                },
+                "+91-8887776664": {
+                    number: "+91-8887776664",
+                    reports: 62,
+                    carrier: "Airtel",
+                    location: "Indore, Madhya Pradesh",
+                    type: "Phishing Scam",
+                    description: "Used for sending phishing links via SMS. The messages claim the user's KYC is expired and contain a malicious link to steal credentials."
+                }
+            }
+        };
+
+        function showReportConfirm(id, service) {
+            const modal = document.getElementById('confirm-modal');
+            const confirmMessage = document.getElementById('confirm-message');
+            const confirmButton = document.getElementById('confirm-button');
+
+            confirmMessage.textContent = `Are you sure you want to report "${id}" to ${service}? This action cannot be undone.`;
+            confirmButton.onclick = () => reportItem(id, service);
+
+            modal.style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirm-modal');
+            modal.style.display = 'none';
+        }
+
+        async function reportItem(id, service) {
+            const confirmButton = document.getElementById('confirm-button');
+            confirmButton.disabled = true;
+            confirmButton.innerHTML = '<i data-lucide="loader" class="animate-spin w-4 h-4 inline-block mr-2"></i> Reporting...';
+            lucide.createIcons();
+            
+            console.log(`Sending report for "${id}" to ${service}...`);
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500)); 
+
+            confirmButton.innerHTML = '<i data-lucide="check" class="w-4 h-4 inline-block mr-2"></i> Reported!';
+            confirmButton.style.backgroundColor = '#10b981';
+            
+            setTimeout(() => {
+                closeConfirmModal();
+                confirmButton.disabled = false;
+                confirmButton.innerHTML = 'Confirm';
+                confirmButton.style.backgroundColor = '';
+                lucide.createIcons();
+            }, 1000);
+        }
+
+        function showDetails(type, row) {
+            const id = row.dataset.id;
+            const detailsPanel = document.getElementById('details-view');
+            const detailsTitle = document.getElementById('details-title');
+            const detailsContent = document.getElementById('details-content');
+
+            let itemData;
+            if (type === 'app') {
+                itemData = mockData.apps[id];
+                detailsTitle.textContent = `Details: ${itemData.name}`;
+                detailsContent.innerHTML = `
+                    <p><span class="font-semibold text-white">ID:</span> ${itemData.id}</p>
+                    <p><span class="font-semibold text-white">Reports:</span> ${itemData.reports}</p>
+                    <p><span class="font-semibold text-white">Last Seen:</span> ${itemData.last_seen}</p>
+                    <p class="mt-2"><span class="font-semibold text-white">Description:</span> ${itemData.description}</p>
+                    <p class="mt-2"><span class="font-semibold text-white">Key Permissions:</span> ${itemData.permissions.join(', ')}</p>
+                `;
+            } else if (type === 'number') {
+                itemData = mockData.numbers[id];
+                detailsTitle.textContent = `Details: ${itemData.number}`;
+                detailsContent.innerHTML = `
+                    <p><span class="font-semibold text-white">Reports:</span> ${itemData.reports}</p>
+                    <p><span class="font-semibold text-white">Carrier:</span> ${itemData.carrier}</p>
+                    <p><span class="font-semibold text-white">Location:</span> ${itemData.location}</p>
+                    <p><span class="font-semibold text-white">Type of Fraud:</span> ${itemData.type}</p>
+                    <p class="mt-2"><span class="font-semibold text-white">Description:</span> ${itemData.description}</p>
+                `;
+            }
+
+            detailsPanel.classList.remove('details-panel');
+            detailsPanel.classList.add('panel', 'fade-in');
+            detailsPanel.style.display = 'block';
+            document.getElementById('watchlist-grid').style.display = 'none';
+
+            lucide.createIcons();
+        }
+
+        function closeDetails() {
+            const detailsPanel = document.getElementById('details-view');
+            detailsPanel.classList.remove('panel', 'fade-in');
+            detailsPanel.classList.add('details-panel');
+            detailsPanel.style.display = 'none';
+            document.getElementById('watchlist-grid').style.display = 'grid';
+        }
+    </script>
+</body>
+</html>
